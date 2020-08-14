@@ -1,15 +1,17 @@
 import {inject, lifeCycleObserver, LifeCycleObserver} from '@loopback/core';
 import {juggler} from '@loopback/repository';
 
+const env =  process.env;
+
 const config = {
   name: 'mongo',
   connector: 'mongodb',
   url: '',
-  host: 'localhost',
-  port: 27017,
+  host: env.DB_CONTAINER_HOST,
+  port: env.DB_CONTAINER_PORT,
   user: '',
   password: '',
-  database: 'game',
+  database: env.DB_NAME,
   useNewUrlParser: true
 };
 
