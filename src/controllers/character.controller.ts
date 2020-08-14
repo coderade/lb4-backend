@@ -22,8 +22,9 @@ import {CharacterRepository} from '../repositories';
 export class CharacterController {
   constructor(
     @repository(CharacterRepository)
-    public characterRepository : CharacterRepository,
-  ) {}
+    public characterRepository: CharacterRepository,
+  ) {
+  }
 
   @post('/characters', {
     responses: {
@@ -44,8 +45,13 @@ export class CharacterController {
         },
       },
     })
-    character: Omit<Character, 'ID'>,
+      character: Omit<Character, 'ID'>,
   ): Promise<Character> {
+    let characterId = 1;
+    while (await this.characterRepository.exists(characterId)) {
+      characterId++;
+    }
+    character.id = characterId;
     return this.characterRepository.create(character);
   }
 
@@ -100,7 +106,7 @@ export class CharacterController {
         },
       },
     })
-    character: Character,
+      character: Character,
     @param.where(Character) where?: Where<Character>,
   ): Promise<Count> {
     return this.characterRepository.updateAll(character, where);
@@ -120,7 +126,7 @@ export class CharacterController {
   })
   async findById(
     @param.path.number('id') id: number,
-    @param.filter(Character, {exclude: 'where'}) filter?: FilterExcludingWhere<Character>
+    @param.filter(Character, {exclude: 'where'}) filter?: FilterExcludingWhere<Character>,
   ): Promise<Character> {
     return this.characterRepository.findById(id, filter);
   }
@@ -141,7 +147,7 @@ export class CharacterController {
         },
       },
     })
-    character: Character,
+      character: Character,
   ): Promise<void> {
     await this.characterRepository.updateById(id, character);
   }
