@@ -1,16 +1,21 @@
-import {DefaultCrudRepository} from '@loopback/repository';
-import {Weapon, WeaponRelations} from '../models';
+import {BelongsToAccessor, DefaultCrudRepository, repository} from '@loopback/repository';
+import {Character, Weapon, WeaponRelations} from '../models';
 import {MongoDataSource} from '../datasources';
 import {inject} from '@loopback/core';
+import {CharacterRepository} from "./character.repository";
 
-export class WeaponRepository extends DefaultCrudRepository<
-  Weapon,
-  typeof Weapon.prototype.id,
-  WeaponRelations
-> {
-  constructor(
-    @inject('datasources.mongo') dataSource: MongoDataSource,
-  ) {
-    super(Weapon, dataSource);
-  }
+class Getter<T> {
+}
+
+export class WeaponRepository extends DefaultCrudRepository<Weapon, typeof Weapon.prototype.id, WeaponRelations> {
+    public readonly character: BelongsToAccessor<Character, typeof Weapon.prototype.id>;
+
+    constructor(
+        @inject('datasources.mongo') dataSource: MongoDataSource,
+        @repository.getter('CharacterRepository')
+        protected characterRepositoryGetter: Getter<CharacterRepository>,
+    ) {
+        super(Weapon, dataSource);
+        this.character = this.createBelongsToAccessorFor('character', characterRepositoryGetter);
+    }
 }
