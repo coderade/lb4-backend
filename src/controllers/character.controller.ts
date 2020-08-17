@@ -1,179 +1,174 @@
 import {
-  Count,
-  CountSchema,
-  Filter,
-  FilterExcludingWhere,
-  repository,
-  Where,
+    Count,
+    CountSchema,
+    Filter,
+    FilterExcludingWhere,
+    repository,
+    Where,
 } from '@loopback/repository';
 import {
-  post,
-  param,
-  get,
-  getModelSchemaRef,
-  patch,
-  put,
-  del,
-  requestBody,
+    post,
+    param,
+    get,
+    getModelSchemaRef,
+    patch,
+    put,
+    del,
+    requestBody,
 } from '@loopback/rest';
 import {Character} from '../models';
 import {CharacterRepository} from '../repositories';
 
 export class CharacterController {
-  constructor(
-    @repository(CharacterRepository)
-    public characterRepository: CharacterRepository,
-  ) {
-  }
-
-  @post('/characters', {
-    responses: {
-      '200': {
-        description: 'Character model instance',
-        content: {'application/json': {schema: getModelSchemaRef(Character)}},
-      },
-    },
-  })
-  async create(
-    @requestBody({
-      content: {
-        'application/json': {
-          schema: getModelSchemaRef(Character, {
-            title: 'NewCharacter',
-            exclude: ['id'],
-          }),
-        },
-      },
-    })
-      character: Omit<Character, 'ID'>,
-  ): Promise<Character> {
-    let characterId = 1;
-    while (await this.characterRepository.exists(characterId)) {
-      characterId++;
+    constructor(
+        @repository(CharacterRepository)
+        public characterRepository: CharacterRepository,
+    ) {
     }
-    character.id = characterId;
-    return this.characterRepository.create(character);
-  }
 
-  @get('/characters/count', {
-    responses: {
-      '200': {
-        description: 'Character model count',
-        content: {'application/json': {schema: CountSchema}},
-      },
-    },
-  })
-  async count(
-    @param.where(Character) where?: Where<Character>,
-  ): Promise<Count> {
-    return this.characterRepository.count(where);
-  }
-
-  @get('/characters', {
-    responses: {
-      '200': {
-        description: 'Array of Character model instances',
-        content: {
-          'application/json': {
-            schema: {
-              type: 'array',
-              items: getModelSchemaRef(Character, {includeRelations: true}),
+    @post('/characters', {
+        responses: {
+            '200': {
+                description: 'Character model instance',
+                content: {'application/json': {schema: getModelSchemaRef(Character)}},
             },
-          },
         },
-      },
-    },
-  })
-  async find(
-    @param.filter(Character) filter?: Filter<Character>,
-  ): Promise<Character[]> {
-    return this.characterRepository.find(filter);
-  }
-
-  @patch('/characters', {
-    responses: {
-      '200': {
-        description: 'Character PATCH success count',
-        content: {'application/json': {schema: CountSchema}},
-      },
-    },
-  })
-  async updateAll(
-    @requestBody({
-      content: {
-        'application/json': {
-          schema: getModelSchemaRef(Character, {partial: true}),
-        },
-      },
     })
-      character: Character,
-    @param.where(Character) where?: Where<Character>,
-  ): Promise<Count> {
-    return this.characterRepository.updateAll(character, where);
-  }
+    async create(
+        @requestBody({
+            content: {
+                'application/json': {
+                    schema: getModelSchemaRef(Character, {
+                        title: 'NewCharacter',
+                        exclude: ['id'],
+                    }),
+                },
+            },
+        })
+            character: Omit<Character, 'ID'>,
+    ): Promise<Character> {
+        return this.characterRepository.create(character);
+    }
 
-  @get('/characters/{id}', {
-    responses: {
-      '200': {
-        description: 'Character model instance',
-        content: {
-          'application/json': {
-            schema: getModelSchemaRef(Character, {includeRelations: true}),
-          },
+    @get('/characters/count', {
+        responses: {
+            '200': {
+                description: 'Character model count',
+                content: {'application/json': {schema: CountSchema}},
+            },
         },
-      },
-    },
-  })
-  async findById(
-    @param.path.number('id') id: number,
-    @param.filter(Character, {exclude: 'where'}) filter?: FilterExcludingWhere<Character>,
-  ): Promise<Character> {
-    return this.characterRepository.findById(id, filter);
-  }
-
-  @patch('/characters/{id}', {
-    responses: {
-      '204': {
-        description: 'Character PATCH success',
-      },
-    },
-  })
-  async updateById(
-    @param.path.number('id') id: number,
-    @requestBody({
-      content: {
-        'application/json': {
-          schema: getModelSchemaRef(Character, {partial: true}),
-        },
-      },
     })
-      character: Character,
-  ): Promise<void> {
-    await this.characterRepository.updateById(id, character);
-  }
+    async count(
+        @param.where(Character) where?: Where<Character>,
+    ): Promise<Count> {
+        return this.characterRepository.count(where);
+    }
 
-  @put('/characters/{id}', {
-    responses: {
-      '204': {
-        description: 'Character PUT success',
-      },
-    },
-  })
-  async replaceById(
-    @param.path.number('id') id: number,
-    @requestBody() character: Character,
-  ): Promise<void> {
-    await this.characterRepository.replaceById(id, character);
-  }
+    @get('/characters', {
+        responses: {
+            '200': {
+                description: 'Array of Character model instances',
+                content: {
+                    'application/json': {
+                        schema: {
+                            type: 'array',
+                            items: getModelSchemaRef(Character, {includeRelations: true}),
+                        },
+                    },
+                },
+            },
+        },
+    })
+    async find(
+        @param.filter(Character) filter?: Filter<Character>,
+    ): Promise<Character[]> {
+        return this.characterRepository.find(filter);
+    }
 
-  @del('/characters/{id}', {
-    responses: {
-      '204': {
-        description: 'Character DELETE success',
-      },
-    },
-  })
-  async deleteById(@param.path.number('id') id: number): Promise<void> {
-    await this.characterRepository.deleteById(id);
-  }
+    @patch('/characters', {
+        responses: {
+            '200': {
+                description: 'Character PATCH success count',
+                content: {'application/json': {schema: CountSchema}},
+            },
+        },
+    })
+    async updateAll(
+        @requestBody({
+            content: {
+                'application/json': {
+                    schema: getModelSchemaRef(Character, {partial: true}),
+                },
+            },
+        })
+            character: Character,
+        @param.where(Character) where?: Where<Character>,
+    ): Promise<Count> {
+        return this.characterRepository.updateAll(character, where);
+    }
+
+    @get('/characters/{id}', {
+        responses: {
+            '200': {
+                description: 'Character model instance',
+                content: {
+                    'application/json': {
+                        schema: getModelSchemaRef(Character, {includeRelations: true}),
+                    },
+                },
+            },
+        },
+    })
+    async findById(
+        @param.path.string('id') id: string,
+        @param.filter(Character, {exclude: 'where'}) filter?: FilterExcludingWhere<Character>,
+    ): Promise<Character> {
+        return this.characterRepository.findById(id, filter);
+    }
+
+    @patch('/characters/{id}', {
+        responses: {
+            '204': {
+                description: 'Character PATCH success',
+            },
+        },
+    })
+    async updateById(
+        @param.path.string('id') id: string,
+        @requestBody({
+            content: {
+                'application/json': {
+                    schema: getModelSchemaRef(Character, {partial: true}),
+                },
+            },
+        })
+            character: Character,
+    ): Promise<void> {
+        await this.characterRepository.updateById(id, character);
+    }
+
+    @put('/characters/{id}', {
+        responses: {
+            '204': {
+                description: 'Character PUT success',
+            },
+        },
+    })
+    async replaceById(
+        @param.path.string('id') id: string,
+        @requestBody() character: Character,
+    ): Promise<void> {
+        await this.characterRepository.replaceById(id, character);
+    }
+
+    @del('/characters/{id}', {
+        responses: {
+            '204': {
+                description: 'Character DELETE success',
+            },
+        },
+    })
+    async deleteById(@param.path.string('id') id: string): Promise<void> {
+        await this.characterRepository.deleteById(id);
+    }
 }
