@@ -1,5 +1,5 @@
 import {Entity, hasOne, model, property} from '@loopback/repository';
-import {v4 as uuid} from 'uuid';
+import {PermissionKey} from '../authorization';
 import {Armor} from './armor.model';
 import {Weapon} from './weapon.model';
 import {Skill} from './skill.model';
@@ -9,10 +9,15 @@ export class Character extends Entity {
     @property({
         type: 'string',
         id: true,
-        generated: false,
-        default: () => uuid()
+        required: true,
     })
-    id?: string;
+    email?: string;
+
+    @property({
+        type: 'string',
+        required: true,
+    })
+    password: string;
 
     @property({
         type: 'string',
@@ -64,6 +69,10 @@ export class Character extends Entity {
         type: 'number',
     })
     defence?: number;
+
+    @property.array(String)
+    permissions: PermissionKey[];
+
 
 
     @hasOne(() => Armor)

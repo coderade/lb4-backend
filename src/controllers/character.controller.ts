@@ -14,10 +14,26 @@ import {
     patch,
     put,
     del,
-    requestBody,
+    requestBody, HttpErrors,
 } from '@loopback/rest';
 import {Armor, Character, Skill, Weapon} from '../models';
+import {inject, Getter} from '@loopback/core';
 import {ArmorRepository, CharacterRepository, SkillRepository, WeaponRepository} from '../repositories';
+import {
+    MyUserProfile,
+    Credential,
+    MyAuthBindings,
+    PermissionKey,
+    CredentialsRequestBody,
+    UserRequestBody,
+    UserProfileSchema,
+    JWTService,
+} from '../authorization';
+import {
+    authenticate,
+    TokenService,
+    AuthenticationBindings,
+} from '@loopback/authentication';
 
 export class CharacterController {
     constructor(
@@ -29,6 +45,10 @@ export class CharacterController {
         public armorRepository: ArmorRepository,
         @repository(SkillRepository)
         public skillRepository: SkillRepository,
+        @inject(MyAuthBindings.TOKEN_SERVICE)
+        public jwtService: JWTService,
+        @inject.getter(AuthenticationBindings.CURRENT_USER)
+        public getCurrentUser: Getter<MyUserProfile>,
     ) {
     }
 
@@ -53,7 +73,18 @@ export class CharacterController {
         })
             character: Omit<Character, 'ID'>,
     ): Promise<Character> {
-        return this.characterRepository.create(character);
+        character.permissions = [PermissionKey.ViewOwnUser,
+            PermissionKey.CreateUser,
+            PermissionKey.UpdateOwnUser,
+            PermissionKey.DeleteOwnUser];
+        if (await this.characterRepository.exists(character.email)){
+            throw new HttpErrors.BadRequest(`This email already exists`);
+        }
+        else {
+            const savedCharacter = await this.characterRepository.create(character);
+            delete savedCharacter.password;
+            return savedCharacter;
+        }
     }
 
     @get('/characters/count', {
@@ -300,6 +331,39 @@ export class CharacterController {
         char.defence! += levels;
         await this.characterRepository!.updateById(id, char);
         return char;
+    }
+
+    @post('/characters/login', {
+        responses: {
+            '200': {
+                description: 'Token',
+                content: {},
+            },
+        },
+    })
+    async login(
+        @requestBody(CredentialsRequestBody) credential: Credential,
+    ): Promise<{token: string}> {
+        const token = await this.jwtService.getToken(credential);
+        return {token};
+    }
+
+    @get('/characters/me', {
+        responses: {
+            '200': {
+                description: 'The current user profile',
+                content: {
+                    'application/json': {
+                        schema: UserProfileSchema,
+                    },
+                },
+            },
+        },
+    })
+    @authenticate('jwt', {"required": [PermissionKey.ViewOwnUser]})
+    async printCurrentUser(
+    ): Promise<MyUserProfile> {
+        return this.getCurrentUser();
     }
 
 }

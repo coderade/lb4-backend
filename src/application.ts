@@ -9,6 +9,16 @@ import {RestApplication} from '@loopback/rest';
 import {ServiceMixin} from '@loopback/service-proxy';
 import path from 'path';
 import {MySequence} from './sequence';
+import {asGlobalInterceptor} from '@loopback/context';
+import {MyAuthBindings,
+  JWTService,
+  JWTStrategy,
+  UserPermissionsProvider
+} from './authorization';
+import {AuthorizationInterceptor} from './interceptors';
+import {AuthenticationComponent,
+  registerAuthenticationStrategy,
+} from '@loopback/authentication';
 
 export {ApplicationConfig};
 
@@ -17,6 +27,14 @@ export class Lb4Game extends BootMixin(
 ) {
   constructor(options: ApplicationConfig = {}) {
     super(options);
+
+    // Bind authentication component related elements
+    this.component(AuthenticationComponent);
+
+    // Bind JWT & permission authentication strategy related elements
+    registerAuthenticationStrategy(this, JWTStrategy);
+    this.bind(MyAuthBindings.TOKEN_SERVICE).toClass(JWTService);
+    this.bind(MyAuthBindings.USER_PERMISSIONS).toProvider(UserPermissionsProvider);
 
     // Set up the custom sequence
     this.sequence(MySequence);
