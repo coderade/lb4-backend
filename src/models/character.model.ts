@@ -50,6 +50,10 @@ export class Character extends Entity {
     })
     maxMana?: number;
 
+    @property({
+        type: 'number',
+    })
+    currentMana?: number;
 
     @property({
         type: 'number',

@@ -1,4 +1,5 @@
-import {Entity, model, property} from '@loopback/repository';
+import {belongsTo, Entity, model, property} from '@loopback/repository';
+import {Character} from "./character.model";
 
 @model()
 export class Skill extends Entity {
@@ -26,6 +27,9 @@ export class Skill extends Entity {
     required: true,
   })
   cost: number;
+
+  @belongsTo(() => Character)
+  characterId: string;
 
 
   constructor(data?: Partial<Skill>) {

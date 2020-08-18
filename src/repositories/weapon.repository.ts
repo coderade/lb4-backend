@@ -1,11 +1,8 @@
 import {BelongsToAccessor, DefaultCrudRepository, repository} from '@loopback/repository';
 import {Character, Weapon, WeaponRelations} from '../models';
 import {MongoDataSource} from '../datasources';
-import {inject} from '@loopback/core';
+import {Getter, inject} from '@loopback/core';
 import {CharacterRepository} from "./character.repository";
-
-class Getter<T> {
-}
 
 export class WeaponRepository extends DefaultCrudRepository<Weapon, typeof Weapon.prototype.id, WeaponRelations> {
     public readonly character: BelongsToAccessor<Character, typeof Weapon.prototype.id>;
